@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Player Strategy Game</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 80px);
+            grid-template-rows: repeat(5, 80px);
+            gap: 5px;
+            justify-content: center;
+            margin: 20px auto;
+        }
+        .cell {
+            width: 80px;
+            height: 80px;
+            background-color: #333;
+            border: 1px solid #666;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .selected {
+            background-color: #555;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        .controls button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .winner {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px 0;
+        }
+        .move-history {
+            margin-top: 20px;
+        }
+        .move-history div {
+            margin-bottom: 10px;
+        }
+        .status {
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Two-Player Strategy Game</h1>
+    <div id="status" class="status">Waiting for another player to join...</div>
+    <div id="winner" class="winner" style="display:none;">Player A wins!</div>
+    <div class="board" id="board"></div>
+    <div class="controls">
+        <button id="L">L</button>
+        <button id="R">R</button>
+        <button id="F">F</button>
+        <button id="B">B</button>
+        <button id="FL">FL</button>
+        <button id="FR">FR</button>
+        <button id="BL">BL</button>
+        <button id="BR">BR</button>
+    </div>
+    <div class="move-history" id="move-history">
+        <h3>Move History</h3>
+        <div id="history"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+
+        const socket = new WebSocket('ws://localhost:3000');
+        let playerId;
+
+        socket.onopen = () => {
+            socket.send(JSON.stringify({ action: 'join' }));
+        };
+
+        socket.onmessage = (event) => {
+            const { action, data } = JSON.parse(event.data);
+            if (action === 'joined') {
+                playerId = data.playerId;
+                document.getElementById('status').innerText = `You are Player ${playerId}. Waiting for the opponent to join...`;
+            } else if (action === 'start') {
+                document.getElementById('status').innerText = data.message;
+            } else if (action === 'full') {
+                document.getElementById('status').innerText = data.message;
+            }
+        };
+    </script>
+</body>
+</html>
